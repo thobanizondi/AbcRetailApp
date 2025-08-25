@@ -1,0 +1,110 @@
+@model AbcRetail.Core.Models.Order
+@{
+    ViewData["Title"] = "Order Status";
+}
+<div class="flex" style="justify-content:space-between;align-items:center;">
+    <h2 style="margin:0;font-size:28px;">Order Status</h2>
+    <a href="/Order/Create" class="btn outline">New Order</a>
+</div>
+<div class="card" style="margin-top:24px;">
+    <div class="flex" style="justify-content:space-between;align-items:center;">
+        <div>
+            <div style="font-size:13px;color:var(--muted);">Order ID</div>
+            <div style="font-weight:600;font-size:16px;">@Model.OrderId</div>
+        </div>
+        <div class="status @Model.Status" id="statusBadge">@Model.Status</div>
+    </div>
+    @if(User.IsInRole("Admin")){
+        <form asp-action="UpdateStatus" method="post" style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;">
+            <input type="hidden" name="id" value="@Model.OrderId" />
+            <div>
+                <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px;">New Status</label>
+                <select name="newStatus" class="input" style="min-width:160px;">
+                    @{ var statuses = new[]{"Queued","Processing","Completed","Canceled"}; }
+                    @foreach(var s in statuses){
+                        if(Model.Status==s){
+                            <option value="@s" selected>@s</option>
+                        } else {
+                            <option value="@s">@s</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div style="flex:1;min-width:180px;">
+                <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:4px;">Notes</label>
+                <input type="text" name="notes" class="input" placeholder="Optional notes" />
+            </div>
+            <button class="btn" type="submit" style="height:38px;">Update</button>
+            @if(TempData["StatusError"]!=null){<div style="color:#b00;font-size:12px;">@TempData["StatusError"]</div>}
+        </form>
+    }
+    <div style="margin-top:14px;">
+        <div style="background:#eee;border-radius:6px;overflow:hidden;height:10px;position:relative;">
+            @{int pct = Model.Status=="Queued"?25: Model.Status=="Processing"?65: Model.Status=="Shipped"?100:0;}
+            <div id="progressBar" style="background:var(--accent);height:100%;width:@pct%;transition:width .5s;"></div>
+        </div>
+    </div>
+    <div style="margin-top:14px;">
+        <table class="table">
+            <thead><tr><th style="width:55%">Product</th><th>Qty</th><th>Unit Price (R)</th><th>Line Total (R)</th></tr></thead>
+            <tbody>
+            @foreach(var l in Model.Lines){
+                <tr>
+                    <td>@l.ProductId</td>
+                    <td>@l.Quantity</td>
+                    <td>R @l.UnitPrice</td>
+                    <td>R @(l.UnitPrice * l.Quantity)</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    <div style="text-align:right;font-weight:600;margin-top:10px;">Total: R @Model.Lines.Sum(x=>x.UnitPrice * x.Quantity)</div>
+    </div>
+    <div style="margin-top:24px;">
+        <h4 style="margin:0 0 8px;font-size:16px;">History</h4>
+        <ul id="historyList" style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px;">
+            @if(Model.History!=null && Model.History.Any()){
+                foreach(var h in Model.History.OrderBy(x=>x.TimestampUtc)){
+                    <li style="font-size:13px;display:flex;gap:8px;align-items:center;">
+                        <span style="color:var(--muted);min-width:140px;font-family:monospace;">@h.TimestampUtc.ToString("HH:mm:ss")</span>
+                        <span style="font-weight:600;">@h.Status</span>
+                        @if(!string.IsNullOrEmpty(h.Notes)){<span style="color:var(--muted);">@h.Notes</span>}
+                    </li>
+                }
+            } else {
+                <li style="font-size:13px;color:var(--muted);">No history yet.</li>
+            }
+        </ul>
+    </div>
+</div>
+<script>
+    (function(){
+        const orderId='@Model.OrderId';
+        const badge=document.getElementById('statusBadge');
+        const bar=document.getElementById('progressBar');
+        const list=document.getElementById('historyList');
+        const pctFor=s=>s==='Queued'?25:s==='Processing'?65:s==='Shipped'?100:0;
+        async function poll(){
+            try{
+                const r=await fetch(`/Order/StatusData?id=${orderId}`);
+                if(!r.ok) return;
+                const data=await r.json();
+                if(badge.textContent!==data.status){ badge.textContent=data.status; badge.className='status '+data.status; }
+                bar.style.width=pctFor(data.status)+'%';
+                if(data.history){
+                    list.innerHTML='';
+                    data.history.sort((a,b)=> new Date(a.timestampUtc)-new Date(b.timestampUtc));
+                    for(const h of data.history){
+                        const li=document.createElement('li');
+                        li.style.cssText='font-size:13px;display:flex;gap:8px;align-items:center;';
+                        const ts=new Date(h.timestampUtc).toLocaleTimeString();
+                        li.innerHTML=`<span style="color:var(--muted);min-width:140px;font-family:monospace;">${ts}</span><span style="font-weight:600;">${h.status}</span>${h.notes?`<span style=\"color:var(--muted);\">${h.notes}</span>`:''}`;
+                        list.appendChild(li);
+                    }
+                }
+            }catch{}
+            setTimeout(poll, 2000);
+        }
+        setTimeout(poll, 2000);
+    })();
+</script>

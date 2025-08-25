@@ -1,0 +1,56 @@
+@model IEnumerable<AbcRetail.Core.Models.Order>
+@{
+    ViewData["Title"] = "Track Orders";
+    var postedOrderId = (string?)ViewBag.OrderId ?? string.Empty;
+    var postedEmail = (string?)ViewBag.CustomerEmail ?? string.Empty;
+}
+<div class="flex" style="justify-content:space-between;align-items:center;">
+    <h2 style="margin:0;font-size:28px;">@(User.IsInRole("Admin") ? "Track Orders" : "My Orders")</h2>
+    @if (User.IsInRole("Customer") || User.IsInRole("Admin")){
+        <a href="/Order/Create" class="btn outline">New Order</a>
+    }
+</div>
+<form method="post" asp-action="Track" class="form-grid" style="margin-top:24px;align-items:end;">
+    @Html.AntiForgeryToken()
+    <div>
+        <label>Order ID</label>
+        <input name="orderId" type="text" value="@postedOrderId" placeholder="Enter ID to jump" />
+        <span class="small" style="color:#c00;">@ViewData.ModelState["orderId"]?.Errors.FirstOrDefault()?.ErrorMessage</span>
+    </div>
+    @if (User.IsInRole("Admin")) {
+        <div>
+            <label>Customer Email Starts With</label>
+            <input name="customerEmail" type="text" value="@postedEmail" />
+        </div>
+    }
+    @if (User.IsInRole("Admin")) {
+        <div>
+            <label>&nbsp;</label>
+            <button type="submit" class="btn" name="viewList" value="true">Search / List</button>
+        </div>
+    } else {
+        <div style="display:none"></div>
+    }
+</form>
+<div style="margin-top:32px;">
+    <table class="table">
+        <thead>
+            <tr><th>Order ID</th><th>Customer</th><th>Status</th><th>Created (UTC)</th><th></th></tr>
+        </thead>
+        <tbody>
+        @if(Model!=null && Model.Any()){
+            foreach(var o in Model){
+                <tr>
+                    <td style="font-family:monospace;">@o.OrderId</td>
+                    <td>@o.CustomerId</td>
+                    <td><span class="status @o.Status">@o.Status</span></td>
+                    <td>@o.CreatedUtc.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                    <td><a class="btn outline" style="padding:4px 12px;font-size:12px;" href="@Url.Action("Status", new { id = o.OrderId })">View</a></td>
+                </tr>
+            }
+        } else {
+            <tr><td colspan="5" style="font-size:13px;color:var(--muted);">No orders found.</td></tr>
+        }
+        </tbody>
+    </table>
+</div>

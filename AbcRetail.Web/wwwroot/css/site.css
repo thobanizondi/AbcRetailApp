@@ -1,0 +1,86 @@
+/* Airbnb-inspired styling + dark mode + utilities */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+:root {
+  /* Facebook-inspired palette */
+  --accent:#1877F2;            /* Primary brand blue */
+  --accent-hover:#166FE5;      /* Hover state */
+  --accent-soft:#E7F1FF;       /* Very light background tint */
+  --focus-ring:#1877f233;      /* Focus ring translucent */
+  --text:#1c1e21;              /* Facebook primary text */
+  --bg:#ffffff;                /* Surface background */
+  --muted:#65676B;             /* Secondary text */
+  --radius:14px;
+  --shadow:0 2px 4px rgba(0,0,0,.08),0 8px 24px rgba(0,0,0,.08);
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen;
+}
+html,body {margin:0;padding:0;background:var(--bg);color:var(--text);}
+body {line-height:1.4;-webkit-font-smoothing:antialiased;transition:background .4s,color .4s;}
+html.dark {--text:#f5f6f7;--bg:#18191A;--muted:#B0B3B8;--shadow:0 2px 4px rgba(0,0,0,.6),0 8px 24px rgba(0,0,0,.4);background:#18191A;}
+a {color:var(--accent);text-decoration:none;font-weight:500;}
+a:hover {text-decoration:underline;}
+header.main-nav {display:flex;align-items:center;justify-content:space-between;padding:12px 40px;border-bottom:1px solid #eee;position:sticky;top:0;background:var(--bg);z-index:10;backdrop-filter:blur(6px);}
+html.dark header.main-nav {border-color:#222;}
+.logo {font-size:22px;font-weight:700;color:var(--accent);letter-spacing:.5px;}
+nav a {margin:0 14px;color:var(--text);opacity:.85;}
+nav a.active {opacity:1;font-weight:600;}
+.container {max-width:1180px;margin:32px auto;padding:0 40px;}
+.grid {display:grid;gap:32px;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));}
+.card {background:var(--bg);border:1px solid #eee;border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:8px;transition:box-shadow .25s,transform .25s,border-color .25s;}
+html.dark .card {border-color:#222;}
+.card:hover {box-shadow:0 4px 8px rgba(0,0,0,.12),0 12px 32px rgba(0,0,0,.12);transform:translateY(-3px);}
+.card img {width:100%;height:160px;object-fit:cover;border-radius:10px;}
+.tag {display:inline-block;background:#f7f7f7;border-radius:40px;padding:4px 12px;font-size:12px;color:var(--muted);}
+.price {font-weight:600;}
+.btn {appearance:none;border:none;border-radius:10px;background:var(--accent);color:#fff;padding:12px 20px;font-size:14px;font-weight:600;cursor:pointer;box-shadow:var(--shadow);transition:background .25s, transform .2s;}
+.btn:hover {background:var(--accent-hover);} 
+.btn:active {transform:translateY(1px);}
+.btn.outline {background:#fff;color:var(--accent);border:1px solid var(--accent);}
+.btn.outline:hover {background:var(--accent-soft);} 
+.form-grid {display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));}
+/* Form element base styles: include inputs without explicit type so Razor helpers still get styled */
+input:not([type]),
+input[type=text],
+input[type=number],
+input[type=email],
+input[type=search],
+input[type=password],
+textarea,
+select {width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:10px;font-size:14px;background:#fff;transition:border-color .2s, box-shadow .2s, background .3s,color .3s;box-sizing:border-box;}
+input:not([type]):focus,
+input[type=text]:focus,
+input[type=number]:focus,
+input[type=email]:focus,
+input[type=search]:focus,
+input[type=password]:focus,
+textarea:focus,
+select:focus {outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--focus-ring);} 
+html.dark input:not([type]),
+html.dark input[type=text],
+html.dark input[type=number],
+html.dark input[type=email],
+html.dark input[type=search],
+html.dark input[type=password],
+html.dark textarea,
+html.dark select {background:#1d1d1d;border-color:#333;color:var(--text);} 
+label {font-size:12px;text-transform:uppercase;letter-spacing:.08em;font-weight:600;color:var(--muted);display:block;margin-bottom:6px;}
+section.hero {padding:60px 0 10px;}
+.hero h1 {font-size:44px;max-width:720px;margin:0 0 16px;line-height:1.05;}
+.hero p {font-size:18px;color:var(--muted);max-width:560px;margin:0 0 28px;}
+.footer {margin-top:80px;padding:40px 0;border-top:1px solid #eee;font-size:13px;color:var(--muted);} html.dark .footer {border-color:#222;}
+.badge {background:#fff;border:1px solid #eee;padding:4px 10px;border-radius:8px;font-size:12px;}
+.flex {display:flex;gap:16px;}
+.flex.center {align-items:center;}
+.table {width:100%;border-collapse:collapse;}
+.table th,.table td {padding:10px 12px;text-align:left;border-bottom:1px solid #f0f0f0;font-size:14px;}
+.status {padding:4px 10px;border-radius:30px;font-size:12px;background:#f7f7f7;}
+.status.Queued {background:#fff5e6;color:#b86d00;}
+.status.Processing {background:#e6f3ff;color:#005ea6;}
+.status.Shipped {background:#e6ffef;color:#007d3a;}
+.alert {background:#fff5f7;color:#b10033;padding:12px 16px;border-radius:12px;border:1px solid #ffd3df;font-size:14px;margin-bottom:20px;}
+.small {font-size:12px;color:var(--muted);}
+::-webkit-scrollbar {width:10px;height:10px;}::-webkit-scrollbar-thumb {background:#ddd;border-radius:20px;}::-webkit-scrollbar-thumb:hover {background:#ccc;}
+
+/* Utilities */
+.hidden {display:none !important;}
+.fade-in {animation:fade .4s ease;}
+@keyframes fade {from {opacity:0;transform:translateY(4px);} to {opacity:1;transform:translateY(0);} }

@@ -1,0 +1,82 @@
+@{
+    ViewData["Title"] = "Create Order";
+    var products = ViewBag.Products as IEnumerable<AbcRetail.Core.Models.Product>;
+}
+<div class="flex" style="justify-content:space-between;align-items:center;">
+    <h2 style="margin:0;font-size:28px;">Create Order</h2>
+    <a href="/" class="btn outline">Home</a>
+</div>
+<form method="post" style="margin-top:24px;max-width:900px;">
+    @if(User.IsInRole("Admin")){
+
+    <div class="form-grid">
+        <div style="grid-column:1/-1;position:relative;">
+            <label>Customer</label>
+            <input id="customerSearch" type="text" autocomplete="off" placeholder="Search customer by name..." />
+            <input type="hidden" name="customerId" id="customerId" />
+            <div id="customerResults" class="card hidden" style="position:absolute;top:72px;left:0;right:0;max-height:260px;overflow:auto;z-index:50;padding:4px;">
+                <div class="small" style="padding:6px 8px;">Type to search...</div>
+            </div>
+        </div>
+    </div>
+    } else {
+        <input type="hidden" name="customerId" value="@User.Identity?.Name" />
+        <div class="small" style="margin-top:8px;">Ordering as <strong>@User.Identity?.Name</strong></div>
+    }
+    <h3 style="margin:34px 0 12px;font-size:20px;">Order Lines</h3>
+    <div id="lines" class="flex" style="flex-direction:column;gap:14px;">
+         <div class="card" style="padding:18px;">
+                <div class="form-grid" style="margin:0;">
+                    <div>
+                        <label>Product</label>
+                        <select name="productId">
+                            @if(products != null){ foreach(var p in products){<option value="@p.ProductId">@p.Name (@p.Price)</option>} }
+                        </select>
+                    </div>
+                    <div>
+                        <label>Quantity</label>
+                        <input type="number" name="quantity" value="1" min="1" />
+                    </div>
+                </div>
+         </div>
+    </div>
+    <div style="margin-top:20px;" class="flex">
+        <button type="submit" class="btn">Place Order</button>
+    </div>
+</form>
+<script>
+const searchInput = document.getElementById('customerSearch');
+const resultsBox = document.getElementById('customerResults');
+const hiddenId = document.getElementById('customerId');
+let abortCtrl; let lastQuery="";
+function render(items){
+    if(!items.length){resultsBox.innerHTML='<div class="small" style="padding:8px 10px;">No matches</div>';return;}
+    resultsBox.innerHTML = items.map(c=>`<button type="button" data-id="${c.id}" data-name="${c.name}" style="all:unset;cursor:pointer;display:block;padding:10px 12px;border-radius:10px;">`+
+        `<div style="font-weight:600;">${c.name}</div><div class="small" style="margin-top:2px;">${c.email||''}</div>`+
+    `</button>`).join('');
+}
+function openBox(){resultsBox.classList.remove('hidden');}
+function closeBox(){setTimeout(()=>resultsBox.classList.add('hidden'),150);} // delay for click
+searchInput.addEventListener('focus',()=>{ if(searchInput.value.trim()) openBox(); });
+searchInput.addEventListener('input', async e => {
+    const q = e.target.value.trim();
+    if(q===lastQuery) return; lastQuery = q;
+    hiddenId.value='';
+    if(!q){resultsBox.innerHTML='<div class="small" style="padding:6px 8px;">Type to search...</div>';return;}
+    openBox();
+    if(abortCtrl) abortCtrl.abort();
+    abortCtrl = new AbortController();
+    try {
+        const res = await fetch(`/api/customers/search?q=${encodeURIComponent(q)}`, { signal: abortCtrl.signal });
+        if(!res.ok) return; const data = await res.json(); render(data);
+    } catch(err){ if(err.name!=='AbortError'){ console.error(err); } }
+});
+resultsBox.addEventListener('click',e=>{
+    const btn = e.target.closest('button[data-id]');
+    if(!btn) return;
+    hiddenId.value = btn.getAttribute('data-id');
+    searchInput.value = btn.getAttribute('data-name');
+    resultsBox.classList.add('hidden');
+});
+document.addEventListener('click',e=>{ if(!resultsBox.contains(e.target) && e.target!==searchInput){ resultsBox.classList.add('hidden'); } });
+</script>

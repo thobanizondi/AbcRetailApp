@@ -1,0 +1,20 @@
+@{ ViewData["Title"] = "Login"; var returnUrl = ViewBag.ReturnUrl as string; }
+<h2 style="margin-top:0;font-size:28px;">Login</h2>
+<form method="post" asp-action="Login" style="max-width:380px;margin-top:20px;" class="form-grid">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="returnUrl" value="@returnUrl" />
+    <div style="grid-column:1/-1;">
+        <label>Username</label>
+        <input name="username" type="text" autocomplete="username" />
+    </div>
+    <div style="grid-column:1/-1;">
+        <label>Password</label>
+        <input name="password" type="password" autocomplete="current-password" />
+    </div>
+    <div style="grid-column:1/-1;">
+        <button class="btn" type="submit" style="width:100%;">Login</button>
+    </div>
+    @if(!ViewData.ModelState.IsValid){
+        <div class="alert" style="grid-column:1/-1;">@ViewData.ModelState[string.Empty]?.Errors.FirstOrDefault()?.ErrorMessage</div>
+    }
+</form>

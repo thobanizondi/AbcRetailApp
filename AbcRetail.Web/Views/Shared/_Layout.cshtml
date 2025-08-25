@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewData["Title"] - ABC Retail</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <environment include="Development">
+        <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    </environment>
+    <environment exclude="Development">
+        <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    </environment>
+</head>
+<body>
+<header class="main-nav">
+    <div class="logo">abc<span style="color:#000">retail</span></div>
+    <nav>
+        <a href="/" class="@(ViewContext.RouteData.Values["controller"]?.ToString()=="Home"?"active":"")">Home</a>
+        <a href="/Product" class="@(ViewContext.RouteData.Values["controller"]?.ToString()=="Product"?"active":"")">Catalogue</a>
+        @if (User.Identity?.IsAuthenticated == true && (User.IsInRole("Customer") || User.IsInRole("Admin"))) {
+            <a href="/Order/Create" class="@(ViewContext.RouteData.Values["controller"]?.ToString()=="Order" && ViewContext.RouteData.Values["action"]?.ToString()=="Create"?"active":"")">New Order</a>
+            <a href="/Order/Track" class="@(ViewContext.RouteData.Values["controller"]?.ToString()=="Order" && ViewContext.RouteData.Values["action"]?.ToString()=="Track"?"active":"")">Orders</a>
+        }
+        @* Admin specific links *@
+        @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Admin")){
+            <a href="/Product/Create" class="@(ViewContext.RouteData.Values["controller"]?.ToString()=="Product" && ViewContext.RouteData.Values["action"]?.ToString()=="Create"?"active":"")">Add Product</a>
+            <a href="/Logs" class="">Logs</a>
+        }
+    </nav>
+    <div class="flex center">
+        <button id="themeToggle" class="btn outline" style="margin-left:16px;padding:8px 14px;font-size:12px;">Dark</button>
+        @if (User.Identity?.IsAuthenticated == true){
+            <span class="small" style="margin-left:12px;">Hi @User.Identity.Name</span>
+            <a href="/Account/Logout" class="btn outline" style="margin-left:12px;">Logout</a>
+        } else {
+            <a href="/Account/Login" class="btn outline" style="margin-left:12px;">Login</a>
+            <a href="/Account/Register" class="btn outline" style="margin-left:8px;">Sign Up</a>
+        }
+    </div>
+</header>
+<div class="container">
+    @RenderBody()
+</div>
+<footer class="footer container">
+    <div>© @DateTime.UtcNow.Year ABC Retail Demo · <span class="small">Azure Storage + MVC sample</span></div>
+</footer>
+<script>
+    const btn = document.getElementById('themeToggle');
+    const key = 'abc-theme';
+    function apply(t){ document.documentElement.classList.toggle('dark', t==='dark'); btn.textContent = t==='dark' ? 'Light' : 'Dark'; }
+    let theme = localStorage.getItem(key)||'light';
+    apply(theme);
+    btn.addEventListener('click',()=>{ theme = theme==='dark'?'light':'dark'; localStorage.setItem(key, theme); apply(theme); });
+</script>
+@RenderSection("Scripts", required: false)
+</body>
+</html>

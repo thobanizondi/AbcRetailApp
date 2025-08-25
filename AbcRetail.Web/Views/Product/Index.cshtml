@@ -1,0 +1,35 @@
+@model IEnumerable<AbcRetail.Core.Models.Product>
+@{
+    ViewData["Title"] = "Products";
+}
+<div class="flex" style="justify-content:space-between;align-items:center;">
+    <h2 style="margin:0;font-size:28px;">Products</h2>
+    @if (User.IsInRole("Admin"))
+    {
+        <a class="btn" href="@Url.Action("Create")">Add Product</a>
+    }
+</div>
+<div class="grid" style="margin-top:28px;">
+@foreach (var p in Model)
+{
+    <div class="card">
+    @{ var displayUrl = p.ImageUrl; }
+    @if(!string.IsNullOrEmpty(displayUrl)){
+        <img src="@displayUrl" alt="@p.Name" />
+    } else {
+        <div style="height:160px;border-radius:10px;background:linear-gradient(135deg,#f8f8f8,#ececec);display:flex;align-items:center;justify-content:center;font-size:12px;color:#999;">No Image</div>
+    }
+        <div class="flex" style="justify-content:space-between;align-items:flex-start;">
+             <div style="font-weight:600;">@p.Name</div>
+             <div class="price">R @p.Price</div>
+        </div>
+        <div style="font-size:12px;color:var(--muted);">@p.Category</div>
+    <div class="small" style="margin-top:4px;">Stock: @p.Quantity</div>
+        @if(User.IsInRole("Admin")){
+            <div style="margin-top:8px;">
+                <a class="btn outline" style="padding:6px 14px;font-size:12px;" href="@Url.Action("Edit", new { id = p.ProductId })">Edit</a>
+            </div>
+        }
+    </div>
+}
+</div>

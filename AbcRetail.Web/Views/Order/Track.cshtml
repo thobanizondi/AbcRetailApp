@@ -2,11 +2,11 @@
 @{
     ViewData["Title"] = "Track Orders";
     var postedOrderId = (string?)ViewBag.OrderId ?? string.Empty;
-    var postedEmail = (string?)ViewBag.CustomerEmail ?? string.Empty;
+    var postedQuery = (string?)ViewBag.CustomerQuery ?? string.Empty;
 }
 <div class="flex" style="justify-content:space-between;align-items:center;">
     <h2 style="margin:0;font-size:28px;">@(User.IsInRole("Admin") ? "Track Orders" : "My Orders")</h2>
-    @if (User.IsInRole("Customer") || User.IsInRole("Admin")){
+    @if (User.IsInRole("Customer")){
         <a href="/Order/Create" class="btn outline">New Order</a>
     }
 </div>
@@ -19,8 +19,8 @@
     </div>
     @if (User.IsInRole("Admin")) {
         <div>
-            <label>Customer Email Starts With</label>
-            <input name="customerEmail" type="text" value="@postedEmail" />
+            <label>Customer Name / Email Starts With</label>
+            <input name="customerQuery" type="text" value="@postedQuery" />
         </div>
     }
     @if (User.IsInRole("Admin")) {

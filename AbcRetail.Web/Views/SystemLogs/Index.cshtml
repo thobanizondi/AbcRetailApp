@@ -1,0 +1,68 @@
+@{
+    ViewData["Title"] = "Logs";
+    var files = (IEnumerable<(string name,long length, DateTimeOffset? modified)>) (ViewBag.Files ?? Enumerable.Empty<(string,long,DateTimeOffset?)>());
+}
+<h2 style="margin:0 0 16px;font-size:28px;">Logs</h2>
+<div class="flex" style="gap:24px;align-items:flex-start;">
+    <div style="width:260px;">
+        <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:4px;">Files</div>
+        <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:4px;max-height:520px;overflow-y:auto;">
+            @foreach (var f in files){
+                <li>
+                    <button class="log-file-btn" data-file="@f.name" style="width:100%;text-align:left;background:#f5f5f5;border:1px solid #ddd;padding:6px 8px;font-size:12px;border-radius:4px;cursor:pointer;">
+                        <div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">@f.name</div>
+                        <div style="color:#777;font-size:10px;">@string.Format("{0:F1} KB", f.length/1024.0) @f.modified?.UtcDateTime.ToString("HH:mm:ss")</div>
+                    </button>
+                </li>
+            }
+        </ul>
+    </div>
+    <div style="flex:1;min-width:400px;display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;gap:8px;align-items:center;">
+            <div id="currentFile" style="font-size:14px;font-weight:600;">Select a file...</div>
+            <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;">
+                <input type="checkbox" id="tailToggle" /> Tail
+            </label>
+            <button id="refreshBtn" class="btn outline" style="padding:4px 12px;font-size:12px;">Refresh</button>
+            <button id="downloadBtn" class="btn outline" style="padding:4px 12px;font-size:12px;" disabled>Download</button>
+        </div>
+        <div id="terminal" style="background:#111;color:#d0d0d0;font-family:Consolas,monospace;font-size:12px;line-height:1.4;border-radius:6px;position:relative;min-height:520px;max-height:520px;overflow:auto;padding:10px;box-shadow:inset 0 0 0 1px #333;">
+            <div style="position:absolute;top:4px;right:8px;font-size:10px;color:#555;">LIVE VIEW</div>
+            <pre id="logContent" style="margin:0;white-space:pre-wrap;word-break:break-word;">Select a log file from the left.</pre>
+        </div>
+    </div>
+</div>
+<script>
+(function(){
+    const buttons=document.querySelectorAll('.log-file-btn');
+    const content=document.getElementById('logContent');
+    const current=document.getElementById('currentFile');
+    const tail=document.getElementById('tailToggle');
+    const refresh=document.getElementById('refreshBtn');
+    const download=document.getElementById('downloadBtn');
+    let selected=null; let timer=null;
+    function fetchFile(){
+        if(!selected) return;
+        const url=`/Logs/File?name=${encodeURIComponent(selected)}${tail.checked?'&tail=true':''}`;
+        fetch(url).then(r=> r.ok?r.text():Promise.reject(r.status)).then(txt=>{
+            content.textContent=txt||'(empty)';
+            const term=document.getElementById('terminal');
+            if(tail.checked){ term.scrollTop=term.scrollHeight; }
+        }).catch(()=>{});
+    }
+    function schedule(){
+        if(timer) clearTimeout(timer);
+        if(tail.checked){ timer=setTimeout(()=>{ fetchFile(); schedule(); }, 2000); }
+    }
+    buttons.forEach(b=> b.addEventListener('click',()=>{
+        selected=b.getAttribute('data-file');
+        current.textContent=selected;
+        download.disabled=false;
+        fetchFile();
+        schedule();
+    }));
+    tail.addEventListener('change',()=>{ fetchFile(); schedule(); });
+    refresh.addEventListener('click',()=> fetchFile());
+    download.addEventListener('click',()=>{ if(selected) window.location=`/Logs/File?name=${encodeURIComponent(selected)}`; });
+})();
+</script>

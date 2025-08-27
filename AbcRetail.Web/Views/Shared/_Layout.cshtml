@@ -18,13 +18,15 @@
         <a href="/" class="@(ViewContext.RouteData.Values["controller"]?.ToString()=="Home"?"active":"")">Home</a>
         <a href="/Product" class="@(ViewContext.RouteData.Values["controller"]?.ToString()=="Product"?"active":"")">Catalogue</a>
         @if (User.Identity?.IsAuthenticated == true && (User.IsInRole("Customer") || User.IsInRole("Admin"))) {
-            <a href="/Order/Create" class="@(ViewContext.RouteData.Values["controller"]?.ToString()=="Order" && ViewContext.RouteData.Values["action"]?.ToString()=="Create"?"active":"")">New Order</a>
+            if(User.IsInRole("Customer")){
+                <a href="/Order/Create" class="@(ViewContext.RouteData.Values["controller"]?.ToString()=="Order" && ViewContext.RouteData.Values["action"]?.ToString()=="Create"?"active":"")">New Order</a>
+            }
             <a href="/Order/Track" class="@(ViewContext.RouteData.Values["controller"]?.ToString()=="Order" && ViewContext.RouteData.Values["action"]?.ToString()=="Track"?"active":"")">Orders</a>
         }
         @* Admin specific links *@
         @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Admin")){
             <a href="/Product/Create" class="@(ViewContext.RouteData.Values["controller"]?.ToString()=="Product" && ViewContext.RouteData.Values["action"]?.ToString()=="Create"?"active":"")">Add Product</a>
-            <a href="/Logs" class="">Logs</a>
+                <a href="/Logs" class="">SystemLogs</a>
         }
     </nav>
     <div class="flex center">

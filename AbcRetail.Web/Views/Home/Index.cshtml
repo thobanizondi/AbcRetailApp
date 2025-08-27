@@ -6,7 +6,9 @@
     <p>Table Storage for flexible data, Blob Storage for media, Queues for resilience through a clean MVC.</p>
     <div class="flex">
         <a class="btn" href="/Product">Browse Products</a>
-        <a class="btn outline" href="/Order/Create">Place Order</a>
+        @if(User.IsInRole("Customer")){
+            <a class="btn outline" href="/Order/Create">Place Order</a>
+        }
     </div>
 </section>
 <section>
@@ -22,7 +24,9 @@
             <div class="tag">Orders</div>
             <h3 style="margin:4px 0 6px;font-size:18px;">Place & Track</h3>
             <p style="margin:0 0 14px;color:var(--muted);font-size:14px;">Submit orders; processing flows through queues.</p>
-            <a class="btn" href="/Order/Create">New Order</a>
+            @if(User.IsInRole("Customer")){
+                <a class="btn" href="/Order/Create">New Order</a>
+            }
         </div>
         <div class="card">
             <div class="tag">Images</div>

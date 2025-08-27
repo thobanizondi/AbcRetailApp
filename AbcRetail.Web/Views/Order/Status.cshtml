@@ -4,7 +4,9 @@
 }
 <div class="flex" style="justify-content:space-between;align-items:center;">
     <h2 style="margin:0;font-size:28px;">Order Status</h2>
-    <a href="/Order/Create" class="btn outline">New Order</a>
+    @if(User.IsInRole("Customer")){
+        <a href="/Order/Create" class="btn outline">New Order</a>
+    }
 </div>
 <div class="card" style="margin-top:24px;">
     <div class="flex" style="justify-content:space-between;align-items:center;">

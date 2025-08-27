@@ -7,11 +7,11 @@ using System.Text;
 namespace AbcRetail.Web.Controllers;
 
 [Authorize(Roles = "Admin")]
-public class LogsController : Controller
+public class SystemLogsController : Controller
 {
     private readonly ShareServiceClient _shareService;
     private readonly StorageOptions _options;
-    public LogsController(ShareServiceClient shareService, StorageOptions options)
+    public SystemLogsController(ShareServiceClient shareService, StorageOptions options)
     {
         _shareService = shareService;
         _options = options;
@@ -44,8 +44,7 @@ public class LogsController : Controller
             .OrderByDescending(f => f.modified)
             .ThenByDescending(f => f.name)
             .ToList();
-        // Explicitly point to SystemLogs view folder (view moved from /Views/Logs to /Views/SystemLogs)
-        return View("~/Views/SystemLogs/Index.cshtml");
+        return View();
     }
 
     [HttpGet]

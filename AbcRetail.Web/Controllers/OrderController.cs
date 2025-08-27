@@ -25,7 +25,7 @@ public class OrderController : Controller
     }
 
     [HttpGet]
-    [Authorize(Roles = "Customer,Admin")] // both can create orders
+    [Authorize(Roles = "Customer")] // only customers can create orders
     public async Task<IActionResult> Create()
     {
         ViewBag.Products = await _products.ListAsync();
@@ -38,9 +38,10 @@ public class OrderController : Controller
     }
 
     [HttpPost]
-    [Authorize(Roles = "Customer,Admin")] // create submit
+    [Authorize(Roles = "Customer")] // only customers can submit
     public async Task<IActionResult> Create(string customerId, string[] productId, int[] quantity)
     {
+    if (!User.IsInRole("Customer")) return Forbid(); // extra safety
     await _appLogger.LogInfoAsync($"OrderController.Create START userRole={(User.IsInRole("Admin")?"Admin":"Customer")} postedCustomerId={customerId}");
         // For Customers, ignore any posted customerId and enforce their own identity
         if (User.IsInRole("Customer"))
@@ -176,10 +177,15 @@ public class OrderController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Track(string orderId, string customerEmail, bool viewList = false)
+    public async Task<IActionResult> Track(string orderId, string customerQuery, bool viewList = false)
     {
         ViewBag.OrderId = orderId;
-        ViewBag.CustomerEmail = User.IsInRole("Admin") ? customerEmail : string.Empty;
+        ViewBag.CustomerQuery = User.IsInRole("Admin") ? customerQuery : string.Empty;
+        // If user is performing a customer search only, ensure any spurious required error for orderId is cleared
+        if (string.IsNullOrWhiteSpace(orderId))
+        {
+            ModelState.Remove("orderId");
+        }
         // Shortcut: if specific order ID filled, redirect
         if (!string.IsNullOrWhiteSpace(orderId))
         {
@@ -191,11 +197,21 @@ public class OrderController : Controller
         if (User.IsInRole("Admin"))
         {
             orders = await _orders.ListAsync(100);
-            if (!string.IsNullOrWhiteSpace(customerEmail))
+            if (!string.IsNullOrWhiteSpace(customerQuery))
             {
-                var customers = await _customers.SearchByEmailAsync(customerEmail.Trim(), 50);
-                var set = customers.Select(c => c.CustomerId).ToHashSet();
-                orders = orders.Where(o => set.Contains(o.CustomerId));
+                customerQuery = customerQuery.Trim();
+                // Search by email and name; union the resulting customer IDs
+                var byEmail = await _customers.SearchByEmailAsync(customerQuery, 50);
+                var byName = await _customers.SearchByNameAsync(customerQuery, 50);
+                var idSet = byEmail.Concat(byName).Select(c => c.CustomerId).ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+                // Also allow direct prefix match on CustomerId (which for registered users is email; for system-created may be an ID)
+                orders = orders.Where(o =>
+                    idSet.Contains(o.CustomerId) ||
+                    o.CustomerId.StartsWith(customerQuery, StringComparison.OrdinalIgnoreCase) ||
+                    // If query looks like an email local-part, allow match before '@'
+                    (!customerQuery.Contains('@') && o.CustomerId.Contains('@') && o.CustomerId.Split('@')[0].StartsWith(customerQuery, StringComparison.OrdinalIgnoreCase))
+                );
             }
         }
         else

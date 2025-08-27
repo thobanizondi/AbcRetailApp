@@ -104,6 +104,11 @@ public class AccountController : Controller
                 ModelState.AddModelError(string.Empty, "Invalid credentials");
                 return View();
             }
+            if (customer.IsDisabled)
+            {
+                ModelState.AddModelError(string.Empty, "Account disabled");
+                return View();
+            }
             // Verify password
             var attempted = HashPassword(password);
             if (!string.Equals(attempted, customer.PasswordHash, StringComparison.OrdinalIgnoreCase))
@@ -130,6 +135,16 @@ public class AccountController : Controller
     {
         await HttpContext.SignOutAsync();
         return RedirectToAction("Index", "Home");
+    }
+
+    // Silent logout used when last browser tab closes (triggered via navigator.sendBeacon)
+    [Authorize]
+    [HttpPost]
+    [IgnoreAntiforgeryToken] // sign-out CSRF is low risk; beacon can't easily send token
+    public async Task<IActionResult> LogoutBeacon()
+    {
+        await HttpContext.SignOutAsync();
+        return Ok();
     }
 
     public IActionResult AccessDenied() => View();

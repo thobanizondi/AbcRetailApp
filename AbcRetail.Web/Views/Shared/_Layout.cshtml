@@ -26,7 +26,8 @@
         @* Admin specific links *@
         @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Admin")){
             <a href="/Product/Create" class="@(ViewContext.RouteData.Values["controller"]?.ToString()=="Product" && ViewContext.RouteData.Values["action"]?.ToString()=="Create"?"active":"")">Add Product</a>
-                <a href="/Logs" class="">SystemLogs</a>
+            <a href="/CustomerManagement" class="@(ViewContext.RouteData.Values["controller"]?.ToString()=="CustomerManagement"?"active":"")">Customers</a>
+            <a href="/Logs" class="">SystemLogs</a>
         }
     </nav>
     <div class="flex center">
@@ -53,6 +54,47 @@
     let theme = localStorage.getItem(key)||'light';
     apply(theme);
     btn.addEventListener('click',()=>{ theme = theme==='dark'?'light':'dark'; localStorage.setItem(key, theme); apply(theme); });
+
+    // Session auto-clear when last tab closes:
+    (function(){
+        if(!('localStorage' in window)) return;
+        const TAB_KEY='abc.tab.count';
+        const LAST_ACTION='abc.last.action';
+        function inc(){
+            const n=parseInt(localStorage.getItem(TAB_KEY)||'0',10)+1; localStorage.setItem(TAB_KEY,String(n));
+        }
+        function dec(){
+            const n=parseInt(localStorage.getItem(TAB_KEY)||'0',10)-1; localStorage.setItem(TAB_KEY,String(Math.max(0,n)));
+            return Math.max(0,n);
+        }
+        inc();
+        window.addEventListener('beforeunload',()=>{
+            // mark navigation vs close: if the page becomes hidden then unload quickly with a visibilitychange it's likely navigation
+            localStorage.setItem(LAST_ACTION, document.visibilityState==='hidden'?'nav':'close');
+        });
+        window.addEventListener('unload',()=>{
+            try {
+                const remaining=dec();
+                // Only attempt beacon logout if user is authenticated (server will no-op if already signed out)
+                if(remaining===0){
+                    // Small delay to allow other tabs finishing unload to update count
+                    setTimeout(()=>{
+                        const still=parseInt(localStorage.getItem(TAB_KEY)||'0',10);
+                        if(still===0){
+                            navigator.sendBeacon && navigator.sendBeacon('/Account/LogoutBeacon');
+                        }
+                    },75);
+                }
+            }catch{}
+        });
+        // Clean up stale counter if all tabs closed without reset (e.g., crash) by resetting when opening first tab
+        document.addEventListener('visibilitychange',()=>{
+            if(document.visibilityState==='visible'){
+                const n=parseInt(localStorage.getItem(TAB_KEY)||'0',10);
+                if(n<1){ localStorage.setItem(TAB_KEY,'1'); }
+            }
+        });
+    })();
 </script>
 @RenderSection("Scripts", required: false)
 </body>

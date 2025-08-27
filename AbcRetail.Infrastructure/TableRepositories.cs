@@ -15,6 +15,7 @@ internal class CustomerEntity : ITableEntity
     public string Email { get; set; } = string.Empty;
     public string ShippingAddress { get; set; } = string.Empty;
     public string PasswordHash { get; set; } = string.Empty;
+    public bool IsDisabled { get; set; }
 }
 
 internal class ProductEntity : ITableEntity
@@ -59,7 +60,7 @@ public class TableCustomerRepository : ICustomerRepository
         {
             var resp = await _table.GetEntityAsync<CustomerEntity>(Partition(customerId), customerId);
             var e = resp.Value;
-            return new Customer { CustomerId = e.RowKey, Name = e.Name, Email = e.Email, ShippingAddress = e.ShippingAddress, PasswordHash = e.PasswordHash };
+            return new Customer { CustomerId = e.RowKey, Name = e.Name, Email = e.Email, ShippingAddress = e.ShippingAddress, PasswordHash = e.PasswordHash, IsDisabled = e.IsDisabled };
         }
         catch (RequestFailedException ex) when (ex.Status == 404)
         {
@@ -75,7 +76,8 @@ public class TableCustomerRepository : ICustomerRepository
             Name = customer.Name,
             Email = customer.Email,
             ShippingAddress = customer.ShippingAddress,
-            PasswordHash = customer.PasswordHash
+            PasswordHash = customer.PasswordHash,
+            IsDisabled = customer.IsDisabled
         };
         await _table.UpsertEntityAsync(entity);
     }
@@ -88,7 +90,7 @@ public class TableCustomerRepository : ICustomerRepository
         {
             if (e.Name.StartsWith(nameStartsWith, StringComparison.OrdinalIgnoreCase))
             {
-                list.Add(new Customer { CustomerId = e.RowKey, Name = e.Name, Email = e.Email, ShippingAddress = e.ShippingAddress });
+                list.Add(new Customer { CustomerId = e.RowKey, Name = e.Name, Email = e.Email, ShippingAddress = e.ShippingAddress, IsDisabled = e.IsDisabled });
                 if (list.Count >= take) break;
             }
         }
@@ -103,11 +105,30 @@ public class TableCustomerRepository : ICustomerRepository
         {
             if (e.Email.StartsWith(emailStartsWith, StringComparison.OrdinalIgnoreCase))
             {
-                list.Add(new Customer { CustomerId = e.RowKey, Name = e.Name, Email = e.Email, ShippingAddress = e.ShippingAddress });
+                list.Add(new Customer { CustomerId = e.RowKey, Name = e.Name, Email = e.Email, ShippingAddress = e.ShippingAddress, IsDisabled = e.IsDisabled });
                 if (list.Count >= take) break;
             }
         }
         return list;
+    }
+    public async Task<IEnumerable<Customer>> ListAsync(int take = 200)
+    {
+        var list = new List<Customer>();
+        await foreach (var e in _table.QueryAsync<CustomerEntity>())
+        {
+            list.Add(new Customer { CustomerId = e.RowKey, Name = e.Name, Email = e.Email, ShippingAddress = e.ShippingAddress, IsDisabled = e.IsDisabled });
+            if (list.Count >= take) break;
+        }
+        return list.OrderBy(c => c.Email);
+    }
+    public async Task<bool> SetDisabledAsync(string customerId, bool disabled)
+    {
+        var cust = await GetAsync(customerId);
+        if (cust == null) return false;
+        if (cust.IsDisabled == disabled) return true;
+        cust.IsDisabled = disabled;
+        await UpsertAsync(cust);
+        return true;
     }
     private static string Partition(string id) => id.Substring(0,1).ToUpperInvariant();
 }

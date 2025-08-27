@@ -8,6 +8,8 @@ public interface ICustomerRepository
     Task UpsertAsync(Customer customer);
     Task<IEnumerable<Customer>> SearchByNameAsync(string nameStartsWith, int take = 10);
     Task<IEnumerable<Customer>> SearchByEmailAsync(string emailStartsWith, int take = 10);
+    Task<IEnumerable<Customer>> ListAsync(int take = 200);
+    Task<bool> SetDisabledAsync(string customerId, bool disabled);
 }
 
 public interface IProductRepository

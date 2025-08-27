@@ -8,4 +8,6 @@ public class Customer
     public string ShippingAddress { get; set; } = string.Empty;
     // Stored password hash (e.g., SHA256). Empty if not set.
     public string PasswordHash { get; set; } = string.Empty;
+    // When true, customer cannot login or place orders
+    public bool IsDisabled { get; set; }
 }

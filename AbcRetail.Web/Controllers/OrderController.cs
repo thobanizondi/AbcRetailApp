@@ -47,6 +47,12 @@ public class OrderController : Controller
         if (User.IsInRole("Customer"))
         {
             customerId = User.Identity?.Name ?? string.Empty;
+            // Ensure not disabled
+            var cust = await _customers.GetAsync(customerId);
+            if (cust != null && cust.IsDisabled)
+            {
+                return Forbid();
+            }
         }
         if (string.IsNullOrWhiteSpace(customerId))
         {

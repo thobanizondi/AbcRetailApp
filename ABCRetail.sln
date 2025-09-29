@@ -1,6 +1,7 @@
-
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
+VisualStudioVersion = 17.14.36429.23 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AbcRetail.Core", "AbcRetail.Core\AbcRetail.Core.csproj", "{11111111-1111-1111-1111-111111111111}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AbcRetail.Infrastructure", "AbcRetail.Infrastructure\AbcRetail.Infrastructure.csproj", "{22222222-2222-2222-2222-222222222222}"
@@ -8,6 +9,14 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AbcRetail.Web", "AbcRetail.Web\AbcRetail.Web.csproj", "{33333333-3333-3333-3333-333333333333}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AbcRetail.Workers", "AbcRetail.Workers\AbcRetail.Workers.csproj", "{44444444-4444-4444-4444-444444444444}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FunctionApp.TableStorage", "FunctionApp.TableStorage\FunctionApp.TableStorage.csproj", "{2C0A0E03-3116-4835-A74B-8CD2406414F2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FunctionApp.BlobStorage", "FunctionApp.BlobStorage\FunctionApp.BlobStorage.csproj", "{A89546C0-AB89-41EB-B8F0-5EBEA3222F8C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FunctionApp.Queue", "FunctionApp.Queue\FunctionApp.Queue.csproj", "{A7536E8D-C615-4EDE-BDB7-0496C3AE9AA4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FunctionApp.AzureFiles", "FunctionApp.AzureFiles\FunctionApp.AzureFiles.csproj", "{EC0B5291-FDE9-4137-8DA3-79F6672A4EFD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,5 +40,27 @@ Global
 		{44444444-4444-4444-4444-444444444444}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{44444444-4444-4444-4444-444444444444}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{44444444-4444-4444-4444-444444444444}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2C0A0E03-3116-4835-A74B-8CD2406414F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2C0A0E03-3116-4835-A74B-8CD2406414F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2C0A0E03-3116-4835-A74B-8CD2406414F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2C0A0E03-3116-4835-A74B-8CD2406414F2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A89546C0-AB89-41EB-B8F0-5EBEA3222F8C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A89546C0-AB89-41EB-B8F0-5EBEA3222F8C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A89546C0-AB89-41EB-B8F0-5EBEA3222F8C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A89546C0-AB89-41EB-B8F0-5EBEA3222F8C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A7536E8D-C615-4EDE-BDB7-0496C3AE9AA4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A7536E8D-C615-4EDE-BDB7-0496C3AE9AA4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A7536E8D-C615-4EDE-BDB7-0496C3AE9AA4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A7536E8D-C615-4EDE-BDB7-0496C3AE9AA4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EC0B5291-FDE9-4137-8DA3-79F6672A4EFD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC0B5291-FDE9-4137-8DA3-79F6672A4EFD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC0B5291-FDE9-4137-8DA3-79F6672A4EFD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC0B5291-FDE9-4137-8DA3-79F6672A4EFD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0199A2D7-B647-487A-B0B9-4F9ECA412A33}
 	EndGlobalSection
 EndGlobal
